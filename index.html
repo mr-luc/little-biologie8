@@ -1,1 +1,30 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bio-Alchemie – Klasse 8</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div><h1>🧬 Bio-Alchemie</h1><p>Klasse 8 · kombiniere Begriffe und entdecke biologische Zusammenhänge</p></div>
+  <div class="stats"><strong id="counter">0 / 0</strong><span id="badge">Starter</span></div>
+</header>
+<main>
+  <section class="play">
+    <div class="combo">
+      <div class="slot" id="a">❔<span>1. Begriff</span></div><b>+</b>
+      <div class="slot" id="b">❔<span>2. Begriff</span></div><b>=</b>
+      <div class="slot result" id="r">✨<span>Ergebnis</span></div>
+    </div>
+    <div id="msg" class="msg">Tippe zwei Begriffe an. Wenn sie zusammenpassen, entsteht ein neuer Biologie-Begriff.</div>
+    <div class="controls"><input id="search" placeholder="Begriff suchen …"><button id="hint">💡 Tipp</button><button id="reset">🔄 Neustart</button></div>
+  </section>
+  <section id="grid" class="grid"></section>
+</main>
+<div id="pop" class="pop"><div class="popcard"><button id="close">×</button><div id="pe">🧬</div><h2 id="pt">Neu</h2><p id="pf"></p><p id="px"></p></div></div>
+<footer>Bio-Alchemie · Lernen durch Kombinieren</footer>
+<script src="script.js"></script>
+</body>
+</html>
