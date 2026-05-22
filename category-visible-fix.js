@@ -1,5 +1,5 @@
 // Fix: Wenn ein neuer Begriff zu einer Kategorie gehört, wird die Kategorie sichtbar.
-// Zusätzlich erscheint ein Hinweis, wenn dadurch eine neue Kategorie freigeschaltet wird.
+// Zusätzlich: Kategorie-Hinweis und Schnellnavigation gegen langes Scrollen.
 (function(){
   const CATEGORY_ORDER=['grundlagen','zellen','bewegung','kreislauf','nerven','immun','oekologie'];
   const CATEGORY_LABEL={
@@ -10,6 +10,15 @@
     nerven:'🧠 Nerven & Hormone',
     immun:'🛡️ Immunbiologie',
     oekologie:'🌳 Ökologie'
+  };
+  const CATEGORY_SHORT={
+    grundlagen:'🌱 Start',
+    zellen:'🔬 Zellen',
+    bewegung:'🦴 Bewegung',
+    kreislauf:'🫁 Kreislauf',
+    nerven:'🧠 Nerven',
+    immun:'🛡️ Immun',
+    oekologie:'🌳 Öko'
   };
   const CATEGORY_MAP={
     mikroskop:'grundlagen',pflanze:'grundlagen',tier:'grundlagen',wasser:'grundlagen',luft:'grundlagen',licht:'grundlagen',nahrung:'grundlagen',nachweis:'grundlagen',knochen:'grundlagen',reiz:'grundlagen',lebensraum:'grundlagen',
@@ -27,8 +36,26 @@
   function categoryHeader(cat){
     const div=document.createElement('div');
     div.className='category-head';
+    div.id='cat-'+cat;
     div.textContent=CATEGORY_LABEL[cat];
     return div;
+  }
+
+  function categoryNav(categories){
+    const nav=document.createElement('div');
+    nav.className='category-nav';
+    categories.forEach(function(cat){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='category-pill';
+      btn.textContent=CATEGORY_SHORT[cat]||CATEGORY_LABEL[cat];
+      btn.onclick=function(){
+        const target=document.getElementById('cat-'+cat);
+        if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+      };
+      nav.appendChild(btn);
+    });
+    return nav;
   }
 
   function visibleCategories(){
@@ -43,13 +70,14 @@
   function categoryUnlockMessage(newCategories){
     if(!newCategories.length)return '';
     const labels=newCategories.map(function(cat){return CATEGORY_LABEL[cat];}).join(', ');
-    return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Schau unten nach den neuen Karten.';
+    return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Nutze oben die Kategorien-Leiste zum Springen.';
   }
 
   render=function(nid){
     grid.innerHTML='';
     const s=(search.value||'').toLowerCase();
     const visible=visibleCategories();
+    const visibleOrdered=CATEGORY_ORDER.filter(function(cat){return visible.has(cat);});
     let newCategories=[];
 
     if(seenCategories){
@@ -58,8 +86,9 @@
       });
     }
 
-    CATEGORY_ORDER.forEach(function(cat){
-      if(!visible.has(cat))return;
+    grid.appendChild(categoryNav(visibleOrdered));
+
+    visibleOrdered.forEach(function(cat){
       const ids=d.filter(function(id){return CATEGORY_MAP[id]===cat&&(!s||I[id][0].toLowerCase().includes(s));});
       if(!ids.length)return;
       grid.appendChild(categoryHeader(cat));
