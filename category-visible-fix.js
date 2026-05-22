@@ -1,5 +1,5 @@
 // Fix: Wenn ein neuer Begriff zu einer Kategorie gehört, wird die Kategorie sichtbar.
-// Dadurch verschwinden neue Karten wie "Konsument" nicht mehr.
+// Zusätzlich erscheint ein Hinweis, wenn dadurch eine neue Kategorie freigeschaltet wird.
 (function(){
   const CATEGORY_ORDER=['grundlagen','zellen','bewegung','kreislauf','nerven','immun','oekologie'];
   const CATEGORY_LABEL={
@@ -22,6 +22,7 @@
   };
 
   const START_SET=new Set(['mikroskop','pflanze','tier','wasser','luft','licht','nahrung','nachweis','knochen','reiz','lebensraum']);
+  let seenCategories=null;
 
   function categoryHeader(cat){
     const div=document.createElement('div');
@@ -39,10 +40,24 @@
     return set;
   }
 
+  function categoryUnlockMessage(newCategories){
+    if(!newCategories.length)return '';
+    const labels=newCategories.map(function(cat){return CATEGORY_LABEL[cat];}).join(', ');
+    return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Schau unten nach den neuen Karten.';
+  }
+
   render=function(nid){
     grid.innerHTML='';
     const s=(search.value||'').toLowerCase();
     const visible=visibleCategories();
+    let newCategories=[];
+
+    if(seenCategories){
+      CATEGORY_ORDER.forEach(function(cat){
+        if(visible.has(cat)&&!seenCategories.has(cat))newCategories.push(cat);
+      });
+    }
+
     CATEGORY_ORDER.forEach(function(cat){
       if(!visible.has(cat))return;
       const ids=d.filter(function(id){return CATEGORY_MAP[id]===cat&&(!s||I[id][0].toLowerCase().includes(s));});
@@ -56,11 +71,16 @@
         grid.appendChild(el);
       });
     });
+
     const discovered=d.filter(function(id){return !START_SET.has(id);}).length;
     counter.textContent=discovered+' / '+(Object.keys(I).length-START_SET.size);
     const bt=btxt();
     badge.textContent=bt;
     last=bt;
+
+    const unlockText=categoryUnlockMessage(newCategories);
+    if(unlockText)msg.innerHTML=unlockText;
+    seenCategories=new Set(visible);
   };
 
   resetSlots();
