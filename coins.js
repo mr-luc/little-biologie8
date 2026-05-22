@@ -1,4 +1,4 @@
-// Münzensystem: Tipps kosten Münzen, neue Entdeckungen bringen Münzen.
+// Münzensystem: Tipps kosten Münzen, neue Entdeckungen und Mini-Spiele bringen Münzen.
 (function(){
   const COIN_KEY='little-bio8-coins-v1';
   const START_COINS=5;
@@ -42,11 +42,12 @@
     if(reason){
       msg.innerHTML=reason+'<br><b>+'+amount+' Münzen</b> · Jetzt hast du <b>'+coins+'</b> Münzen.';
     }
+    return coins;
   }
 
   function spendCoins(amount){
     if(coins<amount){
-      msg.innerHTML='🪙 Du hast <b>'+coins+'</b> Münzen. Ein Tipp kostet <b>'+amount+'</b> Münzen.<br>Entdecke neue Begriffe, um Münzen zu verdienen.';
+      msg.innerHTML='🪙 Du hast <b>'+coins+'</b> Münzen. Ein Tipp kostet <b>'+amount+'</b> Münzen.<br>Entdecke neue Begriffe oder spiele das Mini-Spiel, um Münzen zu verdienen.';
       return false;
     }
     coins-=amount;
@@ -78,6 +79,15 @@
     const a=pair[0],b=pair[1];
     msg.innerHTML='🪙 Tipp gekauft für <b>'+HINT_COST+'</b> Münzen.<br>💡 Probiere <b>'+I[a][1]+' '+I[a][0]+'</b> + <b>'+I[b][1]+' '+I[b][0]+'</b>.';
   }
+
+  window.BioCoins={
+    add:addCoins,
+    spend:spendCoins,
+    get:function(){return coins;},
+    reset:function(){coins=START_COINS;saveCoins();ensureCoinDisplay();return coins;},
+    update:ensureCoinDisplay,
+    hintCost:HINT_COST
+  };
 
   const oldCombine=combine;
   combine=function(a,b){
