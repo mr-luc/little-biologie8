@@ -1,5 +1,4 @@
-// Fix: Wenn ein neuer Begriff zu einer Kategorie gehört, wird die Kategorie sichtbar.
-// Zusätzlich: Kategorie-Hinweis und Schnellnavigation gegen langes Scrollen.
+// Kategorien als Tabs: Es wird nur eine Kategorie angezeigt, damit iPads weniger scrollen müssen.
 (function(){
   const CATEGORY_ORDER=['grundlagen','zellen','bewegung','kreislauf','nerven','immun','oekologie'];
   const CATEGORY_LABEL={
@@ -32,31 +31,7 @@
 
   const START_SET=new Set(['mikroskop','pflanze','tier','wasser','luft','licht','nahrung','nachweis','knochen','reiz','lebensraum']);
   let seenCategories=null;
-
-  function categoryHeader(cat){
-    const div=document.createElement('div');
-    div.className='category-head';
-    div.id='cat-'+cat;
-    div.textContent=CATEGORY_LABEL[cat];
-    return div;
-  }
-
-  function categoryNav(categories){
-    const nav=document.createElement('div');
-    nav.className='category-nav';
-    categories.forEach(function(cat){
-      const btn=document.createElement('button');
-      btn.type='button';
-      btn.className='category-pill';
-      btn.textContent=CATEGORY_SHORT[cat]||CATEGORY_LABEL[cat];
-      btn.onclick=function(){
-        const target=document.getElementById('cat-'+cat);
-        if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
-      };
-      nav.appendChild(btn);
-    });
-    return nav;
-  }
+  let activeCategory='grundlagen';
 
   function visibleCategories(){
     const set=new Set(['grundlagen','zellen']);
@@ -67,10 +42,45 @@
     return set;
   }
 
+  function idsInCategory(cat,searchText){
+    return d.filter(function(id){
+      return CATEGORY_MAP[id]===cat&&(!searchText||I[id][0].toLowerCase().includes(searchText));
+    });
+  }
+
+  function countInCategory(cat){
+    return d.filter(function(id){return CATEGORY_MAP[id]===cat;}).length;
+  }
+
+  function tabBar(categories){
+    const nav=document.createElement('div');
+    nav.className='category-nav category-tabs';
+    categories.forEach(function(cat){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='category-pill '+(cat===activeCategory?'active-tab':'');
+      btn.textContent=(CATEGORY_SHORT[cat]||CATEGORY_LABEL[cat])+' · '+countInCategory(cat);
+      btn.onclick=function(){
+        activeCategory=cat;
+        render();
+        msg.innerHTML='Kategorie gewechselt: <b>'+CATEGORY_LABEL[cat]+'</b>';
+      };
+      nav.appendChild(btn);
+    });
+    return nav;
+  }
+
+  function categoryHeader(cat){
+    const div=document.createElement('div');
+    div.className='category-head';
+    div.textContent=CATEGORY_LABEL[cat];
+    return div;
+  }
+
   function categoryUnlockMessage(newCategories){
     if(!newCategories.length)return '';
     const labels=newCategories.map(function(cat){return CATEGORY_LABEL[cat];}).join(', ');
-    return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Nutze oben die Kategorien-Leiste zum Springen.';
+    return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Ich habe direkt dorthin gewechselt.';
   }
 
   render=function(nid){
@@ -80,18 +90,27 @@
     const visibleOrdered=CATEGORY_ORDER.filter(function(cat){return visible.has(cat);});
     let newCategories=[];
 
+    if(nid&&CATEGORY_MAP[nid])activeCategory=CATEGORY_MAP[nid];
+    if(!visible.has(activeCategory))activeCategory=visibleOrdered[0]||'grundlagen';
+
     if(seenCategories){
       CATEGORY_ORDER.forEach(function(cat){
         if(visible.has(cat)&&!seenCategories.has(cat))newCategories.push(cat);
       });
     }
 
-    grid.appendChild(categoryNav(visibleOrdered));
+    if(newCategories.length)activeCategory=newCategories[0];
 
-    visibleOrdered.forEach(function(cat){
-      const ids=d.filter(function(id){return CATEGORY_MAP[id]===cat&&(!s||I[id][0].toLowerCase().includes(s));});
-      if(!ids.length)return;
-      grid.appendChild(categoryHeader(cat));
+    grid.appendChild(tabBar(visibleOrdered));
+    grid.appendChild(categoryHeader(activeCategory));
+
+    const ids=idsInCategory(activeCategory,s);
+    if(!ids.length){
+      const empty=document.createElement('div');
+      empty.className='category-empty';
+      empty.textContent=s?'Keine Karte in dieser Kategorie gefunden.':'In dieser Kategorie gibt es noch keine sichtbaren Karten.';
+      grid.appendChild(empty);
+    }else{
       ids.forEach(function(id){
         const el=document.createElement('article');
         el.className='card '+(sel===id?'sel ':'')+(nid===id?'new':'');
@@ -99,7 +118,7 @@
         el.onclick=function(){choose(id);};
         grid.appendChild(el);
       });
-    });
+    }
 
     const discovered=d.filter(function(id){return !START_SET.has(id);}).length;
     counter.textContent=discovered+' / '+(Object.keys(I).length-START_SET.size);
