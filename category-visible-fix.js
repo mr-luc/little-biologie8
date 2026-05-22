@@ -1,4 +1,4 @@
-// Kategorien als Tabs: Es wird nur eine Kategorie angezeigt, damit iPads weniger scrollen müssen.
+// Kategorien als Tabs: Es wird nur eine Kategorie angezeigt, mit Fortschritt pro Kategorie.
 (function(){
   const CATEGORY_ORDER=['grundlagen','zellen','bewegung','kreislauf','nerven','immun','oekologie'];
   const CATEGORY_LABEL={
@@ -52,6 +52,14 @@
     return d.filter(function(id){return CATEGORY_MAP[id]===cat;}).length;
   }
 
+  function totalInCategory(cat){
+    return Object.keys(CATEGORY_MAP).filter(function(id){return CATEGORY_MAP[id]===cat&&I[id];}).length;
+  }
+
+  function progressText(cat){
+    return countInCategory(cat)+' / '+totalInCategory(cat);
+  }
+
   function tabBar(categories){
     const nav=document.createElement('div');
     nav.className='category-nav category-tabs';
@@ -59,11 +67,11 @@
       const btn=document.createElement('button');
       btn.type='button';
       btn.className='category-pill '+(cat===activeCategory?'active-tab':'');
-      btn.textContent=(CATEGORY_SHORT[cat]||CATEGORY_LABEL[cat])+' · '+countInCategory(cat);
+      btn.textContent=(CATEGORY_SHORT[cat]||CATEGORY_LABEL[cat])+' · '+progressText(cat);
       btn.onclick=function(){
         activeCategory=cat;
         render();
-        msg.innerHTML='Kategorie gewechselt: <b>'+CATEGORY_LABEL[cat]+'</b>';
+        msg.innerHTML='Kategorie gewechselt: <b>'+CATEGORY_LABEL[cat]+'</b> · Fortschritt: <b>'+progressText(cat)+'</b>';
       };
       nav.appendChild(btn);
     });
@@ -73,13 +81,13 @@
   function categoryHeader(cat){
     const div=document.createElement('div');
     div.className='category-head';
-    div.textContent=CATEGORY_LABEL[cat];
+    div.innerHTML=CATEGORY_LABEL[cat]+' <span class="category-progress">'+progressText(cat)+'</span>';
     return div;
   }
 
   function categoryUnlockMessage(newCategories){
     if(!newCategories.length)return '';
-    const labels=newCategories.map(function(cat){return CATEGORY_LABEL[cat];}).join(', ');
+    const labels=newCategories.map(function(cat){return CATEGORY_LABEL[cat]+' '+progressText(cat);}).join(', ');
     return '🔓 Neue Kategorie freigeschaltet: <b>'+labels+'</b><br>Ich habe direkt dorthin gewechselt.';
   }
 
@@ -120,8 +128,7 @@
       });
     }
 
-    const discovered=d.filter(function(id){return !START_SET.has(id);}).length;
-    counter.textContent=discovered+' / '+(Object.keys(I).length-START_SET.size);
+    counter.textContent=progressText(activeCategory);
     const bt=btxt();
     badge.textContent=bt;
     last=bt;
