@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Civ-Bio Spielfeld</title>
+  <link rel="stylesheet" href="civ-board.css" />
+</head>
+<body>
+  <header class="hud">
+    <div class="title"><span>🧭</span><div><strong>Civ-Bio Spielfeld</strong><small>Prototyp: Karte erkunden</small></div></div>
+    <div class="stats"><span>🧍 Siedler</span><span>🗺️ Entdeckt: <b id="foundCount">1</b></span><span>📍 Feld: <b id="terrainName">Start</b></span></div>
+  </header>
+
+  <main class="game">
+    <section class="map-panel">
+      <div class="map-title">
+        <h1>Weltkarte</h1>
+        <p>Laufe mit dem Siedler über die Hex-Felder. Nebel wird beim Erkunden aufgedeckt.</p>
+      </div>
+      <div id="hexMap" class="hex-map" aria-label="Civ Spielfeld"></div>
+    </section>
+
+    <aside class="side">
+      <h2>Steuerung</h2>
+      <div class="controls">
+        <button data-move="nw">↖</button>
+        <button data-move="ne">↗</button>
+        <button data-move="w">←</button>
+        <button data-move="e">→</button>
+        <button data-move="sw">↙</button>
+        <button data-move="se">↘</button>
+      </div>
+      <button id="revealBtn" class="big">🔍 Umgebung aufdecken</button>
+      <button id="resetBtn" class="danger">Neustart</button>
+
+      <h2>Feldinfo</h2>
+      <div id="tileInfo" class="info">Wähle oder betrete ein Feld.</div>
+
+      <h2>Legende</h2>
+      <div class="legend">
+        <span><i class="dot grass"></i> Ebene</span>
+        <span><i class="dot forest"></i> Wald</span>
+        <span><i class="dot hill"></i> Hügel</span>
+        <span><i class="dot mountain"></i> Gebirge</span>
+        <span><i class="dot water"></i> Wasser</span>
+        <span><i class="dot swamp"></i> Sumpf</span>
+        <span><i class="dot fog"></i> Nebel</span>
+      </div>
+    </aside>
+  </main>
+
+  <script src="civ-board.js"></script>
+</body>
+</html>
